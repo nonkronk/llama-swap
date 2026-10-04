@@ -156,6 +156,63 @@ func TestServer_ClientIP(t *testing.T) {
 	}
 }
 
+func TestServer_TrustedProxyMiddleware(t *testing.T) {
+	tests := []struct {
+		name       string
+		cfg        config.Config
+		xff        string
+		xRealIP    string
+		wantXFF    string
+		wantClient string
+	}{
+		{
+			name:       "trusted proxy restores original client",
+			cfg:        config.Config{TrustedProxyIPs: []string{"100.106.105.121"}},
+			xff:        "100.106.105.121",
+			xRealIP:    "100.96.202.34",
+			wantXFF:    "100.96.202.34, 100.106.105.121",
+			wantClient: "100.96.202.34",
+		},
+		{
+			name:       "untrusted proxy cannot use x-real-ip",
+			cfg:        config.Config{TrustedProxyIPs: []string{"100.106.105.121"}},
+			xff:        "100.77.1.2",
+			xRealIP:    "203.0.113.9",
+			wantXFF:    "100.77.1.2",
+			wantClient: "100.77.1.2",
+		},
+		{
+			name:       "invalid x-real-ip is ignored",
+			cfg:        config.Config{TrustedProxyIPs: []string{"100.106.105.121"}},
+			xff:        "100.106.105.121",
+			xRealIP:    "not-an-ip",
+			wantXFF:    "100.106.105.121",
+			wantClient: "100.106.105.121",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var gotClient string
+			next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				gotClient = clientIP(r)
+			})
+			req := httptest.NewRequest(http.MethodPost, "/v1/chat/completions", nil)
+			req.Header.Set("X-Forwarded-For", tt.xff)
+			req.Header.Set("X-Real-IP", tt.xRealIP)
+
+			CreateTrustedProxyMiddleware(tt.cfg)(next).ServeHTTP(httptest.NewRecorder(), req)
+
+			if got := req.Header.Get("X-Forwarded-For"); got != tt.wantXFF {
+				t.Fatalf("X-Forwarded-For = %q, want %q", got, tt.wantXFF)
+			}
+			if gotClient != tt.wantClient {
+				t.Fatalf("clientIP() = %q, want %q", gotClient, tt.wantClient)
+			}
+		})
+	}
+}
+
 func TestServer_RequestLogMiddleware(t *testing.T) {
 	proxylog := logmon.NewWriter(io.Discard)
 	final := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

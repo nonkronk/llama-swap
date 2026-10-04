@@ -176,6 +176,14 @@
             "default": 10,
             "description": "Graceful timeout in seconds when unloading a model (manual, API, or TTL expiry) before force-killing the model process. 0 uses the default of 10 seconds."
         },
+        "trustedProxyIPs": {
+            "type": "array",
+            "default": [],
+            "items": {
+                "type": "string"
+            },
+            "description": "Immediate proxy IPs allowed to restore the original client address from X-Real-IP when X-Forwarded-For contains that trusted proxy."
+        },
         "globalConcurrencyLimit": {
             "type": "integer",
             "minimum": 0,

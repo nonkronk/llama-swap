@@ -211,6 +211,35 @@ func clientIP(r *http.Request) string {
 	return r.RemoteAddr
 }
 
+// CreateTrustedProxyMiddleware restores the original client address when a
+// trusted reverse proxy rewrites X-Forwarded-For but preserves X-Real-IP.
+// It changes the header only when the current X-Forwarded-For address is
+// explicitly listed in trustedProxyIPs.
+func CreateTrustedProxyMiddleware(cfg config.Config) chain.Middleware {
+	trusted := make(map[string]struct{}, len(cfg.TrustedProxyIPs))
+	for _, raw := range cfg.TrustedProxyIPs {
+		ip := strings.TrimSpace(raw)
+		if net.ParseIP(ip) != nil {
+			trusted[ip] = struct{}{}
+		}
+	}
+
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			xff := r.Header.Get("X-Forwarded-For")
+			first, _, _ := strings.Cut(xff, ",")
+			proxyIP := strings.TrimSpace(first)
+			if _, ok := trusted[proxyIP]; ok {
+				realIP := strings.TrimSpace(r.Header.Get("X-Real-IP"))
+				if net.ParseIP(realIP) != nil && realIP != proxyIP {
+					r.Header.Set("X-Forwarded-For", realIP+", "+xff)
+				}
+			}
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
 // CreateRequestLogMiddleware returns middleware that records one access-log
 // line per request to httplog, in the legacy format:
 //

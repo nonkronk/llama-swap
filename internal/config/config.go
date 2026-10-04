@@ -192,6 +192,7 @@ type Config struct {
 	Performance        PerformanceConfig `yaml:"performance"`
 	GlobalTTL          int               `yaml:"globalTTL"`
 	UnloadTimeout      int               `yaml:"unloadTimeout"`
+	TrustedProxyIPs    []string          `yaml:"trustedProxyIPs"`
 
 	Models    map[string]ModelConfig    `yaml:"models"` /* key is model ID */
 	Profiles  map[string]ProfileConfig  `yaml:"profiles"`

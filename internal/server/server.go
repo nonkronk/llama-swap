@@ -419,7 +419,7 @@ func (s *Server) routes() {
 	mux.Handle("/api/mcp", apiChain.ThenFunc(s.handleAPIMCP))
 
 	s.mux = mux
-	s.handler = chain.New(CreateRequestLogMiddleware(s.logs.HttpLogs), CreateCORSMiddleware(s.cfg)).Then(mux)
+	s.handler = chain.New(CreateTrustedProxyMiddleware(s.cfg), CreateRequestLogMiddleware(s.logs.HttpLogs), CreateCORSMiddleware(s.cfg)).Then(mux)
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {

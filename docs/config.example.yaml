@@ -48,6 +48,14 @@ logTimeFormat: ""
 #   keep printing them to stdout.
 logToStdout: "proxy"
 
+# trustedProxyIPs: immediate proxy addresses allowed to restore the original
+# client address from X-Real-IP when X-Forwarded-For contains that proxy.
+# - optional, default: []
+# - use this only for proxies that overwrite X-Forwarded-For themselves
+# - direct clients cannot trigger the rewrite unless X-Forwarded-For matches
+#   an entry in this list
+# trustedProxyIPs: ["100.106.105.121"]
+
 # store: persistent storage for activity metrics state
 # - optional, default: in-memory sqlite database capped by metricsMaxInMemory
 # - path is a sqlite database file path
