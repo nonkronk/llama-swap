@@ -6,7 +6,7 @@ on:
 
 jobs:
   close-issues:
-    runs-on: [self-hosted, Linux]
+    runs-on: [self-hosted, Linux, ARM64, oci-light]
     permissions:
       issues: write
       pull-requests: write
