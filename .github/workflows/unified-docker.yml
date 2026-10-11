@@ -1,8 +1,7 @@
 name: Build Unified Docker Image
 
 on:
-  schedule:
-    - cron: "37 5 * * *"
+  # Scheduled builds paused until a dedicated repository runner is registered.
 
   workflow_dispatch:
     inputs:
@@ -67,7 +66,7 @@ permissions:
 # multi-hour CUDA compiles.
 jobs:
   setup:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux]
     outputs:
       build_cuda: ${{ steps.plan.outputs.build_cuda }}
       build_vulkan: ${{ steps.plan.outputs.build_vulkan }}
