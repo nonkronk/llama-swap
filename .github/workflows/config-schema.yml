@@ -19,7 +19,7 @@ on:
 jobs:
   validate-schema:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: [self-hosted, Linux]
+    runs-on: [self-hosted, Linux, ARM64, oci-light]
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # 6.0.2
