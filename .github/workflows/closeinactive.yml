@@ -1,12 +1,12 @@
 # https://docs.github.com/en/actions/use-cases-and-examples/project-management/closing-inactive-issues
 name: Close inactive issues
+# No unattended issue closures while runner registration is pending.
 on:
-  schedule:
-    - cron: "32 1 * * *"
+  workflow_dispatch:
 
 jobs:
   close-issues:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux]
     permissions:
       issues: write
       pull-requests: write
