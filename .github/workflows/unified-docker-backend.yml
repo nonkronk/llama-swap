@@ -51,7 +51,7 @@ permissions:
 jobs:
   base:
     name: base
-    runs-on: [self-hosted, Linux]
+    runs-on: [self-hosted, Linux, X64, llama-swap]
     timeout-minutes: 60
     steps:
       - name: Checkout code
@@ -88,7 +88,7 @@ jobs:
   artifacts:
     name: build ${{ matrix.project }}
     needs: base
-    runs-on: [self-hosted, Linux]
+    runs-on: [self-hosted, Linux, X64, llama-swap]
     # Each project gets a runner to itself. GitHub's hard cap is 360m; stop
     # short of it so an overrun is reported as a timeout on one project rather
     # than a silent cancellation of the whole build.
@@ -140,7 +140,7 @@ jobs:
   assemble:
     name: assemble
     needs: artifacts
-    runs-on: [self-hosted, Linux]
+    runs-on: [self-hosted, Linux, X64, llama-swap]
     timeout-minutes: 90
     steps:
       - name: Checkout code
